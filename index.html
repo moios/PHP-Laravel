@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Notas App</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<h1>📝 Mis Notas</h1>
+
+<div class="form">
+    <input type="text" id="title" placeholder="Título">
+    <textarea id="content" placeholder="Contenido"></textarea>
+    <button onclick="crearNota()">Guardar</button>
+</div>
+
+<hr>
+
+<div id="notas"></div>
+
+<script>
+const API = "http://localhost/julio_php/PHP-Laravel/julio.php";
+
+// cargar notas
+async function cargarNotas() {
+    const res = await fetch(API + "?action=list");
+    const data = await res.json();
+
+    const contenedor = document.getElementById("notas");
+    contenedor.innerHTML = "";
+
+    data.forEach(nota => {
+        contenedor.innerHTML += `
+            <div class="nota">
+                <h3>${nota.title}</h3>
+                <p>${nota.content}</p>
+                <button onclick="eliminar(${nota.id})">Eliminar</button>
+            </div>
+        `;
+    });
+}
+
+// crear nota
+async function crearNota() {
+    const title = document.getElementById("title").value;
+    const content = document.getElementById("content").value;
+
+    await fetch(API + "?action=create", {
+        method: "POST",
+        headers: {
+            "Content-Type": "application/x-www-form-urlencoded"
+        },
+        body: `title=${title}&content=${content}`
+    });
+
+    cargarNotas();
+}
+
+// eliminar
+async function eliminar(id) {
+    await fetch(API + "?action=delete&id=" + id);
+    cargarNotas();
+}
+
+// iniciar
+cargarNotas();
+</script>
+
+</body>
+</html>
